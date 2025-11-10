@@ -4,7 +4,15 @@ Frisbii integration for the Pay gem enables you to process payments, manage subs
 
 ## Configuration
 
+Frisbii can be configured using either Rails credentials (recommended) or environment variables.
+
+### Method 1: Rails Credentials (Recommended)
+
 Add your Frisbii API credentials to your Rails credentials file:
+
+```bash
+rails credentials:edit
+```
 
 ```yaml
 frisbii:
@@ -13,19 +21,34 @@ frisbii:
   signing_secret: your_webhook_signing_secret_here
 ```
 
-Or configure via environment variables:
+### Method 2: Environment Variables
+
+Set these environment variables in your deployment environment:
+
+```bash
+export FRISBII_PRIVATE_KEY="priv_your_private_api_key_here"
+export FRISBII_PUBLIC_KEY="pub_your_public_api_key_here"  # Optional
+export FRISBII_SIGNING_SECRET="your_webhook_signing_secret_here"
+```
+
+The gem automatically checks for credentials in this order:
+
+1. Rails credentials (`rails credentials:edit`)
+2. Environment variables (as fallback)
+
+### Method 3: Manual Configuration
+
+You can also set credentials directly in an initializer:
 
 ```ruby
 # config/initializers/pay.rb
 Pay.setup do |config|
   config.enabled_processors = [:frisbii]
-
-  # Configure Frisbii
-  Pay::Frisbii.configure do |frisbii|
-    frisbii.private_key = ENV["FRISBII_PRIVATE_KEY"]
-    frisbii.signing_secret = ENV["FRISBII_SIGNING_SECRET"]
-  end
 end
+
+# Manually set credentials (useful for custom configuration logic)
+Pay::Frisbii.private_key = ENV.fetch("CUSTOM_FRISBII_KEY")
+Pay::Frisbii.signing_secret = Rails.application.secrets.frisbii_webhook_secret
 ```
 
 ## Usage
@@ -104,18 +127,20 @@ payment_method.detach
 
 Configure your webhook endpoint in your Frisbii dashboard:
 
-```
+```bash
 https://yourdomain.com/pay/webhooks/frisbii
 ```
 
 The gem automatically handles these webhook events:
 
 #### Customer Events
+
 - `customer_created`
 - `customer_updated`
 - `customer_deleted`
 
 #### Payment/Invoice Events
+
 - `invoice_settled` - Payment successful
 - `invoice_failed` - Payment failed
 - `invoice_authorized` - Payment authorized (requires capture)
@@ -123,6 +148,7 @@ The gem automatically handles these webhook events:
 - `invoice_cancelled` - Payment cancelled
 
 #### Subscription Events
+
 - `subscription_created`
 - `subscription_cancelled`
 - `subscription_uncancelled`
@@ -133,6 +159,7 @@ The gem automatically handles these webhook events:
 - `subscription_trial_end`
 
 #### Payment Method Events
+
 - `payment_method_created`
 - `payment_method_updated`
 - `payment_method_deleted`
@@ -196,6 +223,7 @@ end
 ## API Documentation
 
 For more details on the Frisbii API, visit:
+
 - [Frisbii Documentation](https://docs.frisbii.com)
 - [API Reference](https://docs.frisbii.com/reference)
 
@@ -220,6 +248,7 @@ Pay.enabled_processors = [:fake_processor]
 ## Support
 
 For issues specific to the Frisbii integration, please include:
+
 - Your Pay gem version
 - Rails version
 - Complete error messages and stack traces
