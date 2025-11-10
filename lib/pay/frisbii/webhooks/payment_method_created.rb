@@ -1,11 +1,11 @@
 module Pay
   module Frisbii
     module Webhooks
-      class UpaymentUmethodUcreated
+      class PaymentMethodCreated
         def call(event)
           # TODO: Implement webhook handler for payment_method_created
           Rails.logger.info "[Pay] Processing Frisbii payment_method_created webhook"
-          
+
           # Extract relevant data from event
           # Sync with local database as needed
         rescue => e

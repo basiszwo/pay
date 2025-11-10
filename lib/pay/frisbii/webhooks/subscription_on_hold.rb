@@ -1,11 +1,11 @@
 module Pay
   module Frisbii
     module Webhooks
-      class UsubscriptionUonUhold
+      class SubscriptionOnHold
         def call(event)
           # TODO: Implement webhook handler for subscription_on_hold
           Rails.logger.info "[Pay] Processing Frisbii subscription_on_hold webhook"
-          
+
           # Extract relevant data from event
           # Sync with local database as needed
         rescue => e

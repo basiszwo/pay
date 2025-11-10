@@ -1,11 +1,11 @@
 module Pay
   module Frisbii
     module Webhooks
-      class UsubscriptionUreactivated
+      class SubscriptionReactivated
         def call(event)
           # TODO: Implement webhook handler for subscription_reactivated
           Rails.logger.info "[Pay] Processing Frisbii subscription_reactivated webhook"
-          
+
           # Extract relevant data from event
           # Sync with local database as needed
         rescue => e
