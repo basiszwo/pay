@@ -3,11 +3,15 @@ module Pay
     module Webhooks
       class InvoiceCancelled
         def call(event)
-          # TODO: Implement webhook handler for invoice_cancelled
-          Rails.logger.info "[Pay] Processing Frisbii invoice_cancelled webhook"
+          # Extract the invoice/charge from the event
+          invoice = event.dig("invoice")
+          return unless invoice
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Sync the charge from Frisbii (cancelled state)
+          # This typically happens when an authorized charge is cancelled before capture
+          Pay::Frisbii::Charge.sync(invoice["id"], object: invoice)
+
+          # No email needed for cancellation - this is typically a backend operation
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii invoice_cancelled webhook: #{e.message}"
         end

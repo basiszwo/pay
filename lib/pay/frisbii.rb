@@ -20,6 +20,17 @@ module Pay
     # For holding API key
     mattr_accessor :private_key
 
+    # Configuration can be provided via:
+    # 1. Rails credentials (rails credentials:edit):
+    #    frisbii:
+    #      private_key: priv_xxx
+    #      public_key: pub_xxx
+    #      signing_secret: xxx
+    # 2. Environment variables:
+    #    FRISBII_PRIVATE_KEY=priv_xxx
+    #    FRISBII_PUBLIC_KEY=pub_xxx
+    #    FRISBII_SIGNING_SECRET=xxx
+
     class << self
       def enabled?
         return false unless Pay.enabled_processors.include?(:frisbii) && defined?(::RestClient)
@@ -30,19 +41,24 @@ module Pay
       def setup
         Pay.config.application_name ||= Rails.application.class.module_parent_name
 
-        # Set API key from Rails credentials
+        # Set API key from Rails credentials or environment variables
         secrets = Rails.application.credentials.frisbii
-        return unless secrets
 
-        self.private_key = secrets[:private_key]
+        if secrets
+          # Use Rails credentials if available
+          self.private_key = secrets[:private_key]
+        else
+          # Fall back to environment variables
+          self.private_key = ENV["FRISBII_PRIVATE_KEY"] if ENV["FRISBII_PRIVATE_KEY"]
+        end
       end
 
       def public_key
-        find_value_by_name(:frisbii, :public_key)
+        find_value_by_name(:frisbii, :public_key) || ENV["FRISBII_PUBLIC_KEY"]
       end
 
       def signing_secret
-        find_value_by_name(:frisbii, :signing_secret)
+        find_value_by_name(:frisbii, :signing_secret) || ENV["FRISBII_SIGNING_SECRET"]
       end
 
       def configure_webhooks

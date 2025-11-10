@@ -3,11 +3,15 @@ module Pay
     module Webhooks
       class SubscriptionReactivated
         def call(event)
-          # TODO: Implement webhook handler for subscription_reactivated
-          Rails.logger.info "[Pay] Processing Frisbii subscription_reactivated webhook"
+          # Extract subscription from event
+          subscription = event.dig("subscription")
+          return unless subscription
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Sync the subscription from Frisbii (resumed from hold/pause)
+          pay_subscription = Pay::Frisbii::Subscription.sync(subscription["handle"], object: subscription)
+
+          # Log the reactivation
+          Rails.logger.info "[Pay] Frisbii subscription #{subscription["handle"]} has been reactivated from hold"
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii subscription_reactivated webhook: #{e.message}"
         end

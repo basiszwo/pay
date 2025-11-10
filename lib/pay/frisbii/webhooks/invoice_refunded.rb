@@ -3,11 +3,17 @@ module Pay
     module Webhooks
       class InvoiceRefunded
         def call(event)
-          # TODO: Implement webhook handler for invoice_refunded
-          Rails.logger.info "[Pay] Processing Frisbii invoice_refunded webhook"
+          # Extract the invoice/charge from the event
+          invoice = event.dig("invoice")
+          return unless invoice
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Sync the charge with updated refund information
+          pay_charge = Pay::Frisbii::Charge.sync(invoice["id"], object: invoice)
+
+          # Send refund email if enabled
+          if pay_charge && Pay.send_email?(:refund, pay_charge)
+            Pay.mailer.with(pay_customer: pay_charge.customer, pay_charge: pay_charge).refund.deliver_later
+          end
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii invoice_refunded webhook: #{e.message}"
         end

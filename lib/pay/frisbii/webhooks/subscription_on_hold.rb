@@ -3,11 +3,15 @@ module Pay
     module Webhooks
       class SubscriptionOnHold
         def call(event)
-          # TODO: Implement webhook handler for subscription_on_hold
-          Rails.logger.info "[Pay] Processing Frisbii subscription_on_hold webhook"
+          # Extract subscription from event
+          subscription = event.dig("subscription")
+          return unless subscription
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Sync the subscription from Frisbii (paused state)
+          pay_subscription = Pay::Frisbii::Subscription.sync(subscription["handle"], object: subscription)
+
+          # Log the pause event
+          Rails.logger.info "[Pay] Frisbii subscription #{subscription["handle"]} has been put on hold"
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii subscription_on_hold webhook: #{e.message}"
         end

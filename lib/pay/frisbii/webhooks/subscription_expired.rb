@@ -3,11 +3,15 @@ module Pay
     module Webhooks
       class SubscriptionExpired
         def call(event)
-          # TODO: Implement webhook handler for subscription_expired
-          Rails.logger.info "[Pay] Processing Frisbii subscription_expired webhook"
+          # Extract subscription from event
+          subscription = event.dig("subscription")
+          return unless subscription
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Sync the subscription from Frisbii (expired/ended state)
+          pay_subscription = Pay::Frisbii::Subscription.sync(subscription["handle"], object: subscription)
+
+          # The subscription has fully expired (past grace period)
+          Rails.logger.info "[Pay] Frisbii subscription #{subscription["handle"]} has expired"
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii subscription_expired webhook: #{e.message}"
         end

@@ -3,11 +3,17 @@ module Pay
     module Webhooks
       class PaymentMethodUpdated
         def call(event)
-          # TODO: Implement webhook handler for payment_method_updated
-          Rails.logger.info "[Pay] Processing Frisbii payment_method_updated webhook"
+          # Extract payment method from event
+          payment_method = event.dig("payment_method")
+          return unless payment_method
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          if payment_method["customer"]
+            # Sync the updated payment method
+            Pay::Frisbii::PaymentMethod.sync(payment_method["id"], object: payment_method)
+          else
+            # If customer was removed, delete the payment method if it exists
+            Pay::PaymentMethod.find_by(processor: :frisbii, processor_id: payment_method["id"])&.destroy
+          end
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii payment_method_updated webhook: #{e.message}"
         end

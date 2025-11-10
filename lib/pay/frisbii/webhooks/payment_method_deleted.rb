@@ -3,11 +3,17 @@ module Pay
     module Webhooks
       class PaymentMethodDeleted
         def call(event)
-          # TODO: Implement webhook handler for payment_method_deleted
-          Rails.logger.info "[Pay] Processing Frisbii payment_method_deleted webhook"
+          # Extract payment method from event
+          payment_method = event.dig("payment_method")
+          return unless payment_method
 
-          # Extract relevant data from event
-          # Sync with local database as needed
+          # Find and delete the payment method from our database
+          pay_payment_method = Pay::PaymentMethod.find_by(
+            processor: :frisbii,
+            processor_id: payment_method["id"]
+          )
+
+          pay_payment_method&.destroy
         rescue => e
           Rails.logger.error "[Pay] Error processing Frisbii payment_method_deleted webhook: #{e.message}"
         end
