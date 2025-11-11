@@ -17,6 +17,7 @@ module Pay
   # Payment processors
   autoload :Braintree, "pay/braintree"
   autoload :FakeProcessor, "pay/fake_processor"
+  autoload :Frisbii, "pay/frisbii"
   autoload :PaddleBilling, "pay/paddle_billing"
   autoload :PaddleClassic, "pay/paddle_classic"
   autoload :LemonSqueezy, "pay/lemon_squeezy"
@@ -57,7 +58,7 @@ module Pay
   @@routes_path = "/pay"
 
   mattr_accessor :enabled_processors
-  @@enabled_processors = [:stripe, :braintree, :paddle_billing, :paddle_classic, :lemon_squeezy]
+  @@enabled_processors = [:stripe, :braintree, :paddle_billing, :paddle_classic, :lemon_squeezy, :frisbii]
 
   mattr_accessor :send_emails
   @@send_emails = true
